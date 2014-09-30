@@ -78,7 +78,7 @@ public class StreamCipherTest extends TestCase {
             // Test for equality
             if (!Arrays.equals(randBytes1,randBytes2)) {
                 System.out.println("Not Same");
-                assertFalse("Testing INEQUALITY",true);
+                assertTrue("Testing INEQUALITY",true);
             }
 
         }

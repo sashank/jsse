@@ -76,7 +76,7 @@ public class SWPTest
     {
         System.out.println("Test AES Searchable ");
 
-        double loadFactor = 0.5; // No false positives but additional storage
+        double loadFactor = 1; // No false positives but additional storage
          try {
              SWP swp = new SWP(SSEUtil.getSecretKeySpec(password,
                      SSEUtil.getRandomBytes(20)), "AES",loadFactor);
