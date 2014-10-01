@@ -65,10 +65,10 @@ public class AESTest extends TestCase {
             byte[] plainText = blockCipher.decrypt(cipherText);
 
             if (Arrays.equals(plainBytes, plainText))
-                System.out.println("It works !");
+                assertTrue("Deterministic Encryption Works" , true);
         }
         catch (Exception e){
-            System.out.println("Something went wrong .. some where .." + e.getMessage());
+            assertTrue("Deterministic Encryption Does not Work" + e.getMessage() , true);
         }
 
     }
@@ -91,10 +91,10 @@ public class AESTest extends TestCase {
             byte[] decryptBytes = randCipher.decrypt(cipherBytes, idIvBytes);
 
             if (Arrays.equals(plainBytes, decryptBytes))
-                System.out.println("It works !");
+                assertTrue("Randomized Encryption Works" , true);
         }
         catch (Exception e){
-            System.out.println("Something went wrong .. some where .." + e.getMessage());
+            assertTrue("Randomized Encryption Does not Work" + e.getMessage() , true);
         }
 
     }

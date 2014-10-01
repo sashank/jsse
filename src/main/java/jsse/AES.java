@@ -26,28 +26,36 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
+import java.security.InvalidParameterException;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 
-/**
- * Created by sashank dara on 05/09/14.
- */
+
 public class AES implements BlockCipher {
 
     protected Cipher cipher;
     protected SecretKeySpec keySpec ;
     byte[]  ivBytes = null;
 
-    public AES(String mode, SecretKeySpec spec) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
+    public AES(String mode, SecretKeySpec spec) throws InvalidParameterException {
+        try {
             keySpec = spec ;
             cipher = Cipher.getInstance(mode, "BC");
+        } catch (Exception e){
+            throw  new InvalidParameterException("Invalid Parameters" + e.getMessage());
+        }
+
     }
-    public AES(String mode, SecretKeySpec spec, byte[] ivBytes) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
+    public AES(String mode, SecretKeySpec spec, byte[] ivBytes) throws InvalidParameterException{
+        try {
             keySpec = spec ;
             this.ivBytes = ivBytes;
             cipher = Cipher.getInstance(mode, "BC");
+        } catch (Exception e){
+            throw  new InvalidParameterException("Invalid Parameters" + e.getMessage());
+        }
     }
-    public AES(String mode, byte[] key) throws NoSuchPaddingException, NoSuchAlgorithmException, NoSuchProviderException {
+    public AES(String mode, byte[] key) throws InvalidParameterException {
             byte[] fullKey = new byte[16];
             System.arraycopy(key,0,fullKey,0,key.length);
             if(key.length < 16){
@@ -55,8 +63,13 @@ public class AES implements BlockCipher {
                    fullKey[i] = 0 ;
             }
 
-            keySpec = new SecretKeySpec(fullKey,"AES");
-            cipher = Cipher.getInstance(mode, "BC");
+            try {
+                keySpec = new SecretKeySpec(fullKey, "AES");
+                cipher = Cipher.getInstance(mode, "BC");
+            }   catch (Exception e){
+                 throw  new InvalidParameterException("Invalid Parameters" + e.getMessage());
+            }
+
     }
 
     public  byte[] encrypt(byte[] plainBytes) throws Exception {

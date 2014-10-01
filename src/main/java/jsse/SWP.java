@@ -54,15 +54,9 @@ public class SWP implements SearchableCipher {
         StreamCipher.init(spec);
         seedBytes = SSEUtil.getRandomBytes(16); // For Nonce
         if (type.equals("AES")) {
-            try {
                 blockCipher = new AES("AES/ECB/PKCS7Padding", spec);
                 BLOCK_SIZE = 128;
                 BLOCK_BYTES = BLOCK_SIZE / Byte.SIZE ;  // 16 Bytes if AES
-
-            } catch (NoSuchPaddingException | NoSuchAlgorithmException | NoSuchProviderException e) {
-               e.printStackTrace();
-               throw new InvalidParameterException("Invalid Init Parameters");
-            }
         }
 
         this.left =  ((int) (loadFactor  * BLOCK_BYTES));
