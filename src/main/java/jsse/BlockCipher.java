@@ -25,5 +25,10 @@ public interface BlockCipher {
 
     public byte[] encrypt(byte[] plainBytes) throws Exception;
     public byte[] decrypt(byte[] cipherText) throws Exception;
+    public byte[] encrypt(byte[] plainBytes, byte[] ivBytes) throws Exception;
 
+
+    public byte[] decrypt(byte[] cipherText, byte[] ivBytes) throws Exception;
+
+    public byte[] getIvBytes(long id);
 }

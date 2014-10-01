@@ -197,5 +197,20 @@ public class SWP implements SearchableCipher {
         return blockCipher.decrypt(cipherBytes);
     }
 
+    @Override
+    public byte[] encrypt(byte[] plainBytes, byte[] ivBytes) throws Exception {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] decrypt(byte[] cipherText, byte[] ivBytes) throws Exception {
+        return new byte[0];
+    }
+
+    @Override
+    public byte[] getIvBytes(long id) {
+        return new byte[0];
+    }
+
 }
 
