@@ -1,13 +1,3 @@
-package jsse;
-
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.spec.SecretKeySpec;
-import javax.print.DocFlavor;
-import java.security.InvalidParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
-import java.util.Arrays;
-
 /*
 *
 *    jsse is Symmetric Searchable Encryption Library in Java
@@ -35,9 +25,21 @@ import java.util.Arrays;
 *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 *
 **/
+
+package jsse;
+
+import com.cisco.fnr.FNR;
+
+import javax.crypto.spec.SecretKeySpec;
+import java.security.InvalidParameterException;
+import java.util.Arrays;
+
+
 public class SWP implements SearchableCipher {
 
-    private BlockCipher blockCipher;
+    private AES aesCipher;
+    private FNR fnrCipher;
+    private String type;
     public static int BLOCK_SIZE;
     public static int BLOCK_BYTES;
     private byte[] seedBytes;
@@ -46,19 +48,30 @@ public class SWP implements SearchableCipher {
     private final int left;
     private final int right ;
 
-    public SWP(SecretKeySpec spec, String type, double loadFactor) throws InvalidParameterException{
+    public SWP(SecretKeySpec spec, String type, double loadFactor, int blockSize) throws InvalidParameterException{
 
         if( loadFactor <= 0 || loadFactor > 1)
             throw new InvalidParameterException("Invalid Load Factor");
 
         StreamCipher.init(spec);
         seedBytes = SSEUtil.getRandomBytes(16); // For Nonce
-        if (type.equals("AES")) {
-                blockCipher = new AES("AES/ECB/PKCS7Padding", spec);
-                BLOCK_SIZE = 128;
-                BLOCK_BYTES = BLOCK_SIZE / Byte.SIZE ;  // 16 Bytes if AES
+        switch (type){
+            case "AES" :
+                if(blockSize != 128)
+                    throw new InvalidParameterException("Invalid Block Size for AES");
+                aesCipher = new AES("AES/ECB/PKCS7Padding", spec);
+                break;
+            case "FNR" :
+                fnrCipher = new FNR(spec.getEncoded(),"tweak",blockSize);
+                break;
+            default:
+                throw  new InvalidParameterException("Invalid Block Cipher type");
         }
 
+        // init parameters
+        this.type = type ;
+        BLOCK_SIZE  = blockSize;
+        BLOCK_BYTES = BLOCK_SIZE/Byte.SIZE;
         this.left =  ((int) (loadFactor  * BLOCK_BYTES));
         this.right = BLOCK_BYTES - left ;
     }
@@ -72,7 +85,7 @@ public class SWP implements SearchableCipher {
         byte[] streamCipherBytes = StreamCipher.getRandomStreamOfBytes(
                 recordID, seedBytes);
 
-        byte[] blockCipherBytes = blockCipher.encrypt(plainBytes);
+        byte[] blockCipherBytes = encrypt(plainBytes);
 
 		/* Split the cipher Bytes into {left, Right} */
         byte[] blockCipherBytesLeft = Arrays.copyOfRange(blockCipherBytes, 0,
@@ -81,11 +94,9 @@ public class SWP implements SearchableCipher {
                 left);
 
 		/* Generate search layer */
-        byte[] searchLayerBytesRight;
-        BlockCipher tmpCipher = new AES("AES/ECB/PKCS7Padding",
-                blockCipherBytesLeft);
-        byte[] tmpBytes = tmpCipher.encrypt(streamCipherBytesLeft);
+        byte[] tmpBytes = getSearchLayer(blockCipherBytesLeft,streamCipherBytesLeft);
 
+        byte[] searchLayerBytesRight;
         if(right == 0) // No false positives but additional storage
           searchLayerBytesRight = Arrays.copyOfRange(tmpBytes, 0, BLOCK_BYTES);
         else  //Expect false positives while searching
@@ -126,7 +137,7 @@ public class SWP implements SearchableCipher {
                 streamCipherBytesLeft);
 
         if(blockCipherBytesLeft.length == BLOCK_BYTES)
-            return  blockCipher.decrypt(blockCipherBytesLeft);
+            return  decrypt(blockCipherBytesLeft);
 
         else {
 
@@ -134,9 +145,7 @@ public class SWP implements SearchableCipher {
              * compute the right bytes of search layer
              * */
 
-            BlockCipher tmpCipher = new AES("AES/ECB/PKCS7Padding",
-                    blockCipherBytesLeft);
-            byte[] tmpBytes = tmpCipher.encrypt(streamCipherBytesLeft);
+            byte[] tmpBytes = getSearchLayer(blockCipherBytesLeft,streamCipherBytesLeft);
             byte[] tmpBytesRight = Arrays.copyOfRange(tmpBytes, 0, right);
 
 
@@ -147,7 +156,7 @@ public class SWP implements SearchableCipher {
             System.arraycopy(blockCipherBytesLeft, 0, blockLayerBytes, 0, left);
             System.arraycopy(blockCipherBytesRight, 0, blockLayerBytes, left, right);
 
-            return blockCipher.decrypt(blockLayerBytes);
+            return decrypt(blockLayerBytes);
         }
     }
 
@@ -175,35 +184,43 @@ public class SWP implements SearchableCipher {
         byte[] trapDoorBytesLeft  = Arrays.copyOfRange(trapDoorBytes,0,left);
 
         /* Verify search layer */
-        BlockCipher tmpCipher = new AES("AES/ECB/PKCS7Padding", trapDoorBytesLeft);
-        byte[] tmpBytes = tmpCipher.encrypt(searchBytesLeft);
+        byte[] tmpBytes = getSearchLayer(trapDoorBytesLeft, searchBytesLeft);
         byte[] tmpBytesRight = Arrays.copyOfRange(tmpBytes,0,right);
 
         return  Arrays.equals(searchBytesRight,tmpBytesRight) ;
 
     }
 
-    public byte[] encrypt(byte[] plainBytes) throws Exception {
-        return blockCipher.encrypt(plainBytes);
+    private byte[] encrypt(byte[] plainBytes) throws Exception {
+        switch (type){
+            case "AES" :
+                return aesCipher.encrypt(plainBytes);
+            case "FNR" :
+                return fnrCipher.encrypt(plainBytes);
+        }
+        return null;
     }
 
-    public byte[] decrypt(byte[] cipherBytes) throws Exception {
-        return blockCipher.decrypt(cipherBytes);
+    private byte[] decrypt(byte[] cipherBytes) throws Exception {
+        switch (type){
+            case "AES" :
+                return aesCipher.decrypt(cipherBytes);
+            case "FNR" :
+                return fnrCipher.decrypt(cipherBytes);
+        }
+        return null;
     }
 
-    @Override
-    public byte[] encrypt(byte[] plainBytes, byte[] ivBytes) throws Exception {
-        return new byte[0];
-    }
-
-    @Override
-    public byte[] decrypt(byte[] cipherText, byte[] ivBytes) throws Exception {
-        return new byte[0];
-    }
-
-    @Override
-    public byte[] getIvBytes(long id) {
-        return new byte[0];
+    private byte[] getSearchLayer(byte[] key, byte[] data)  throws Exception {
+        switch (type) {
+            case "AES" :
+                AES aesCipher = new AES("AES/ECB/PKCS7Padding", key);
+                return aesCipher.encrypt(data);
+            case "FNR" :
+                FNR tmpCipher = new FNR(key,"tweak",data.length * Byte.SIZE); //Not Block Size
+                return tmpCipher.encrypt(data);
+        }
+        return  null;
     }
 
 }

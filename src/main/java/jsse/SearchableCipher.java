@@ -21,7 +21,7 @@ package jsse;
 *
 **/
 
-public interface SearchableCipher extends BlockCipher{
+public interface SearchableCipher {
 
     byte[] encrypt(byte[] plainBytes, long recordID) throws Exception;
 

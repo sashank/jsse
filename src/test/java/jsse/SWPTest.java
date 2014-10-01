@@ -5,6 +5,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import java.lang.reflect.Field;
 import java.security.Security;
 import java.util.Arrays;
 
@@ -59,7 +60,6 @@ public class SWPTest
 
         password = "test"; // NOT FOR PRODUCTION
         Security.addProvider(new BouncyCastleProvider());
-
     }
 
 
@@ -72,14 +72,13 @@ public class SWPTest
      * Searchable without False Positives
      * Notice that the load factor is 1
      */
-    public void testSWP_NO_FP()
-    {
+    public void testSWP_NO_FP_AES() {
         System.out.println("Test AES Searchable ");
 
         double loadFactor = 1; // No false positives but additional storage
          try {
              SWP swp = new SWP(SSEUtil.getSecretKeySpec(password,
-                     SSEUtil.getRandomBytes(20)), "AES",loadFactor);
+                     SSEUtil.getRandomBytes(20)), "AES",loadFactor, 128);
 
              byte[] plainBytes = ("Hello").getBytes();
              byte[] cipherText = swp.encrypt(plainBytes, 1);
@@ -102,10 +101,41 @@ public class SWPTest
                  assertTrue("Matching works Blind-foldedly !",true);
 
 
-             byte[] decryptTrapDoor = swp.decrypt(trapDoor);
+         } catch (Exception e){
+             e.printStackTrace();
+             assertTrue("Something went wrong .. some where !!! .." + e.getMessage(),false);
+         }
+    }
+    public void testSWP_NO_FP_FNR() {
+        System.out.println("Test FNR Searchable ");
 
-             if (Arrays.equals(plainBytes, decryptTrapDoor))
-                 assertTrue("Decrypted trap door also matches",true);
+        double loadFactor = 1; // No false positives but additional storage
+         try {
+             String givenText = "Hello" ;
+             byte[] plainBytes = givenText.getBytes();
+             SWP swp = new SWP(SSEUtil.getSecretKeySpec(password,
+                     SSEUtil.getRandomBytes(20)), "FNR",loadFactor, plainBytes.length*Byte.SIZE);
+
+
+             byte[] cipherText = swp.encrypt(plainBytes, 1);
+
+             if(cipherText.length == 2 * SWP.BLOCK_BYTES)
+                 assertTrue("Additional Storage", true);
+             else
+                 assertTrue("Strange",false);
+
+             byte[] plainText = swp.decrypt(cipherText, 1);
+
+             if (Arrays.equals(plainBytes, plainText))
+                 assertTrue("Encryption and Decryption works !",true);
+
+             // Get Trapdoor
+             byte[] trapDoor = swp.getTrapDoor(plainBytes);
+
+             // Check Match
+             if (swp.isMatch(trapDoor, cipherText))
+                 assertTrue("Matching works Blind-foldedly !",true);
+
 
          } catch (Exception e){
              e.printStackTrace();
@@ -113,22 +143,20 @@ public class SWPTest
          }
     }
 
-
-
     /**
      * Rigourous Test :-)
      * SWP With no additional storage
      * Search could have False Positives
      * Notice that the load factor is < 1
      */
-    public void testSWP_NO_ADD_STORAGE()
-    {
+    public void testSWP_NO_ADD_STORAGE_AES() {
         System.out.println("Test AES Searchable ");
 
         double loadFactor = 0.7; // No false positives but additional storage
          try {
+
              SWP swp = new SWP(SSEUtil.getSecretKeySpec(password,
-                     SSEUtil.getRandomBytes(20)), "AES",loadFactor);
+                     SSEUtil.getRandomBytes(20)), "AES",loadFactor, 128);
 
              byte[] plainBytes = ("Hello").getBytes();
              byte[] cipherText = swp.encrypt(plainBytes, 1);
@@ -151,10 +179,42 @@ public class SWPTest
                  assertTrue("Matching works Blind-foldedly !",true);
 
 
-             byte[] decryptTrapDoor = swp.decrypt(trapDoor);
+         } catch (Exception e){
+             e.printStackTrace();
+             assertTrue("Something went wrong .. some where !!! .." + e.getMessage(),false);
+         }
+    }
 
-             if (Arrays.equals(plainBytes, decryptTrapDoor))
-                 assertTrue("Decrypted trap door also matches",true);
+    public void testSWP_NO_ADD_STORAGE_FNR() {
+        System.out.println("Test FNR Searchable ");
+
+        double loadFactor = 0.7; // No false positives but additional storage
+         try {
+             String givenText = "Hello" ;
+             byte[] plainBytes = givenText.getBytes();
+
+             SWP swp = new SWP(SSEUtil.getSecretKeySpec(password,
+                     SSEUtil.getRandomBytes(20)), "FNR",loadFactor, plainBytes.length*Byte.SIZE);
+
+             byte[] cipherText = swp.encrypt(plainBytes, 1);
+
+             if(cipherText.length > SWP.BLOCK_BYTES)
+                 assertTrue("Strange",false);
+             else
+                 assertTrue("Additional Storage", true);
+
+             byte[] plainText = swp.decrypt(cipherText, 1);
+
+             if (Arrays.equals(plainBytes, plainText))
+                 assertTrue("Encryption and Decryption works !",true);
+
+             // Get Trapdoor
+             byte[] trapDoor = swp.getTrapDoor(plainBytes);
+
+             // Check Match
+             if (swp.isMatch(trapDoor, cipherText))
+                 assertTrue("Matching works Blind-foldedly !",true);
+
 
          } catch (Exception e){
              e.printStackTrace();
@@ -162,14 +222,13 @@ public class SWPTest
          }
     }
 
-
     public void testLoadFactor(){
         System.out.println("Test Load factor ");
         double loadFactor= 0 ;
 
         try {
             new SWP(SSEUtil.getSecretKeySpec(password,
-                    SSEUtil.getRandomBytes(20)), "AES",loadFactor);
+                    SSEUtil.getRandomBytes(20)), "AES",loadFactor, 128);
         }   catch (Exception e){
             assertTrue(true);
         }
@@ -177,7 +236,7 @@ public class SWPTest
         loadFactor = 2;
         try {
             new SWP(SSEUtil.getSecretKeySpec(password,
-                    SSEUtil.getRandomBytes(20)), "AES",loadFactor);
+                    SSEUtil.getRandomBytes(20)), "AES",loadFactor, 128);
         }   catch (Exception e){
             assertTrue(true);
         }
@@ -185,7 +244,7 @@ public class SWPTest
         loadFactor = 1;
         try {
             new SWP(SSEUtil.getSecretKeySpec(password,
-                    SSEUtil.getRandomBytes(20)), "AES",loadFactor);
+                    SSEUtil.getRandomBytes(20)), "AES",loadFactor, 128);
         }   catch (Exception e){
             assertTrue(false);
         }
@@ -193,7 +252,7 @@ public class SWPTest
         loadFactor = 0.5;
         try {
             new SWP(SSEUtil.getSecretKeySpec(password,
-                    SSEUtil.getRandomBytes(20)), "AES",loadFactor);
+                    SSEUtil.getRandomBytes(20)), "AES",loadFactor, 128);
         }   catch (Exception e){
             assertTrue(false);
         }

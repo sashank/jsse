@@ -21,14 +21,12 @@ package jsse;
 *    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 *
 **/
+
 import javax.crypto.Cipher;
-import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.ByteBuffer;
 import java.security.InvalidParameterException;
-import java.security.NoSuchAlgorithmException;
-import java.security.NoSuchProviderException;
 
 
 public class AES implements BlockCipher {
@@ -75,7 +73,6 @@ public class AES implements BlockCipher {
     public  byte[] encrypt(byte[] plainBytes) throws Exception {
 
         cipher.init(Cipher.ENCRYPT_MODE, keySpec);
-        //encrypt the message
         return cipher.doFinal(plainBytes);
     }
 
