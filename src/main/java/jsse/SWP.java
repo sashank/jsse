@@ -191,7 +191,7 @@ public class SWP implements SearchableCipher {
 
     }
 
-    private byte[] encrypt(byte[] plainBytes) throws Exception {
+    public byte[] encrypt(byte[] plainBytes) throws Exception {
         switch (type){
             case "AES" :
                 return aesCipher.encrypt(plainBytes);
@@ -201,7 +201,7 @@ public class SWP implements SearchableCipher {
         return null;
     }
 
-    private byte[] decrypt(byte[] cipherBytes) throws Exception {
+    public byte[] decrypt(byte[] cipherBytes) throws Exception {
         switch (type){
             case "AES" :
                 return aesCipher.decrypt(cipherBytes);

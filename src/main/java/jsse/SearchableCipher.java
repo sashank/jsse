@@ -27,6 +27,10 @@ public interface SearchableCipher {
 
     byte[] decrypt(byte[] cipherBytes, long recordID)throws Exception;
 
+    byte[] encrypt(byte[] plainBytes) throws Exception;
+
+    byte[] decrypt(byte[] cipherBytes)throws Exception;
+
     byte[] getTrapDoor(byte[] plainBytes) throws Exception;
 
     public boolean isMatch(byte[] trapDoorBytes, byte[] cipherBytes)throws Exception;
