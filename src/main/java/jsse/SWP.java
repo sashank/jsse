@@ -37,8 +37,8 @@ import java.util.Arrays;
 
 public class SWP implements SearchableCipher {
 
-    private AES aesCipher;
-    private FNR fnrCipher;
+    private AES aesCipher, aesTmpCipher = null;
+    private FNR fnrCipher, fnrTmpCipher = null;
     private String type;
     public static int BLOCK_SIZE;
     public static int BLOCK_BYTES;
@@ -185,7 +185,11 @@ public class SWP implements SearchableCipher {
 
         /* Verify search layer */
         byte[] tmpBytes = getSearchLayer(trapDoorBytesLeft, searchBytesLeft);
-        byte[] tmpBytesRight = Arrays.copyOfRange(tmpBytes,0,right);
+        byte[] tmpBytesRight ;
+        if(right == 0)
+         tmpBytesRight = Arrays.copyOfRange(tmpBytes,0,BLOCK_BYTES);
+        else
+          tmpBytesRight = Arrays.copyOfRange(tmpBytes,0,right);
 
         return  Arrays.equals(searchBytesRight,tmpBytesRight) ;
 
@@ -214,11 +218,13 @@ public class SWP implements SearchableCipher {
     private byte[] getSearchLayer(byte[] key, byte[] data)  throws Exception {
         switch (type) {
             case "AES" :
-                AES aesCipher = new AES("AES/ECB/PKCS7Padding", key);
-                return aesCipher.encrypt(data);
+                 if(aesTmpCipher == null)
+                     aesTmpCipher = new AES("AES/ECB/PKCS7Padding", key);
+                return aesTmpCipher.encrypt(data);
             case "FNR" :
-                FNR tmpCipher = new FNR(key,"tweak",data.length * Byte.SIZE); //Not Block Size
-                return tmpCipher.encrypt(data);
+                 if(fnrTmpCipher == null)
+                     fnrTmpCipher = new FNR(key,"tweak",data.length * Byte.SIZE); //Not Block Size
+                return fnrTmpCipher.encrypt(data);
         }
         return  null;
     }

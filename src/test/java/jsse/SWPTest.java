@@ -1,5 +1,6 @@
 package jsse;
 
+import com.cisco.fnr.FNRUtils;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -92,6 +93,8 @@ public class SWPTest
 
              if (Arrays.equals(plainBytes, plainText))
                  assertTrue("Encryption and Decryption works !",true);
+             else
+                 assertTrue("Failed", false);
 
              // Get Trapdoor
              byte[] trapDoor = swp.getTrapDoor(plainBytes);
@@ -99,6 +102,8 @@ public class SWPTest
              // Check Match
              if (swp.isMatch(trapDoor, cipherText))
                  assertTrue("Matching works Blind-foldedly !",true);
+             else
+                 assertTrue("Matching Does not work !", false);
 
 
          } catch (Exception e){
@@ -111,30 +116,37 @@ public class SWPTest
 
         double loadFactor = 1; // No false positives but additional storage
          try {
-             String givenText = "Hello" ;
-             byte[] plainBytes = givenText.getBytes();
+             String givenText = "192.168.1.1" ;
+
+             byte[] plainBytes = FNRUtils.rankIPAddress(givenText);
+
              SWP swp = new SWP(SSEUtil.getSecretKeySpec(password,
                      SSEUtil.getRandomBytes(20)), "FNR",loadFactor, plainBytes.length*Byte.SIZE);
 
 
-             byte[] cipherText = swp.encrypt(plainBytes, 1);
+             byte[] cipherBytes = swp.encrypt(plainBytes, 1);
 
-             if(cipherText.length == 2 * SWP.BLOCK_BYTES)
+             if(cipherBytes.length == 2 * SWP.BLOCK_BYTES)
                  assertTrue("Additional Storage", true);
              else
                  assertTrue("Strange",false);
 
-             byte[] plainText = swp.decrypt(cipherText, 1);
+             byte[] decryptBytes = swp.decrypt(cipherBytes, 1);
 
-             if (Arrays.equals(plainBytes, plainText))
+
+             if (Arrays.equals(plainBytes, decryptBytes))
                  assertTrue("Encryption and Decryption works !",true);
+             else
+                assertTrue("Failed", false);
 
              // Get Trapdoor
              byte[] trapDoor = swp.getTrapDoor(plainBytes);
 
              // Check Match
-             if (swp.isMatch(trapDoor, cipherText))
+             if (swp.isMatch(trapDoor, cipherBytes))
                  assertTrue("Matching works Blind-foldedly !",true);
+             else
+                 assertTrue("Matching Does not work !", false);
 
 
          } catch (Exception e){
@@ -161,15 +173,17 @@ public class SWPTest
              byte[] plainBytes = ("Hello").getBytes();
              byte[] cipherText = swp.encrypt(plainBytes, 1);
 
-             if(cipherText.length > SWP.BLOCK_BYTES)
+             if(cipherText.length != SWP.BLOCK_BYTES)
                  assertTrue("Strange",false);
              else
-                 assertTrue("Additional Storage", true);
+                 assertTrue("NO additional Storage", true);
 
              byte[] plainText = swp.decrypt(cipherText, 1);
 
              if (Arrays.equals(plainBytes, plainText))
                  assertTrue("Encryption and Decryption works !",true);
+             else
+                 assertTrue("Failed", false);
 
              // Get Trapdoor
              byte[] trapDoor = swp.getTrapDoor(plainBytes);
@@ -177,6 +191,8 @@ public class SWPTest
              // Check Match
              if (swp.isMatch(trapDoor, cipherText))
                  assertTrue("Matching works Blind-foldedly !",true);
+             else
+                 assertTrue("Matching Does not work !", false);
 
 
          } catch (Exception e){
@@ -198,15 +214,17 @@ public class SWPTest
 
              byte[] cipherText = swp.encrypt(plainBytes, 1);
 
-             if(cipherText.length > SWP.BLOCK_BYTES)
+             if(cipherText.length != SWP.BLOCK_BYTES)
                  assertTrue("Strange",false);
              else
-                 assertTrue("Additional Storage", true);
+                 assertTrue("No additional Storage", true);
 
-             byte[] plainText = swp.decrypt(cipherText, 1);
+             byte[] decryptBytes = swp.decrypt(cipherText, 1);
 
-             if (Arrays.equals(plainBytes, plainText))
+             if (Arrays.equals(plainBytes, decryptBytes))
                  assertTrue("Encryption and Decryption works !",true);
+             else
+                 assertTrue("Failed", false);
 
              // Get Trapdoor
              byte[] trapDoor = swp.getTrapDoor(plainBytes);
@@ -214,6 +232,8 @@ public class SWPTest
              // Check Match
              if (swp.isMatch(trapDoor, cipherText))
                  assertTrue("Matching works Blind-foldedly !",true);
+             else
+                 assertTrue("Matching Does not work !", false);
 
 
          } catch (Exception e){
