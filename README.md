@@ -6,13 +6,15 @@
 	Currently it has implementation of techniques published in
 
  	Citation : 
-	Song, Dawn Xiaoding, David Wagner, and Adrian Perrig. "Practical techniques for searches on encrypted data." Security and Privacy, 2000. S&P 2000. Proceedings. 2000 IEEE Symposium on. IEEE, 2000.
+	Song, Dawn Xiaoding, David Wagner, and Adrian Perrig. "Practical techniques for searches on encrypted data." 
+	Security and Privacy, 2000. S&P 2000. Proceedings. 2000 IEEE Symposium on. IEEE, 2000.
 
 	This is a personal *research prototype* use it at your own risk.
 
 	Internally uses AES from BouncyCastle Library
-	Also uses FNR for space efficiency so make sure you install [libfnr](https://github.com/cisco/libfnr) and [jfnr](https://github.com/cisco/jfnr)
+	Also uses FNR for space efficiency so make sure you install [libfnr] (https://github.com/cisco/libfnr) and [jfnr] (https://github.com/cisco/jfnr)
 
+	If you want to refer this library 
   	LICENSE -- LGPL (2.1) license copy under which this library is being released
 
   	RUN : Import the source code in any editor like IntelliJ or Eclipse
