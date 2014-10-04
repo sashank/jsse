@@ -112,13 +112,56 @@ public class SWPTest
          }
     }
     public void testSWP_NO_FP_FNR() {
-        System.out.println("Test FNR Searchable ");
+        System.out.println("Test FNR Searchable String ");
 
         double loadFactor = 1; // No false positives but additional storage
          try {
-             String givenText = "192.168.1.1" ;
+             String givenText = "Hello " ;
 
              byte[] plainBytes = FNRUtils.rankIPAddress(givenText);
+
+             SWP swp = new SWP(SSEUtil.getSecretKeySpec(password,
+                     SSEUtil.getRandomBytes(20)), "FNR",loadFactor, plainBytes.length*Byte.SIZE);
+
+
+             byte[] cipherBytes = swp.encrypt(plainBytes, 1);
+
+             if(cipherBytes.length == 2 * SWP.BLOCK_BYTES)
+                 assertTrue("Additional Storage", true);
+             else
+                 assertTrue("Strange",false);
+
+             byte[] decryptBytes = swp.decrypt(cipherBytes, 1);
+
+
+             if (Arrays.equals(plainBytes, decryptBytes))
+                 assertTrue("Encryption and Decryption works !",true);
+             else
+                assertTrue("Failed", false);
+
+             // Get Trapdoor
+             byte[] trapDoor = swp.getTrapDoor(plainBytes);
+
+             // Check Match
+             if (swp.isMatch(trapDoor, cipherBytes))
+                 assertTrue("Matching works Blind-foldedly !",true);
+             else
+                 assertTrue("Matching Does not work !", false);
+
+
+         } catch (Exception e){
+             e.printStackTrace();
+             assertTrue("Something went wrong .. some where !!! .." + e.getMessage(),false);
+         }
+    }
+    public void testSWP_NO_FP_FNR_IP() {
+        System.out.println("Test FNR Searchable IP Address ");
+
+        double loadFactor = 1; // No false positives but additional storage
+         try {
+             String givenIp = "192.168.1.1" ;
+             System.out.println("IPAddress " + givenIp);
+             byte[] plainBytes = FNRUtils.rankIPAddress(givenIp);
 
              SWP swp = new SWP(SSEUtil.getSecretKeySpec(password,
                      SSEUtil.getRandomBytes(20)), "FNR",loadFactor, plainBytes.length*Byte.SIZE);
@@ -202,7 +245,7 @@ public class SWPTest
     }
 
     public void testSWP_NO_ADD_STORAGE_FNR() {
-        System.out.println("Test FNR Searchable ");
+        System.out.println("Test FNR Searchable  String");
 
         double loadFactor = 0.7; // No false positives but additional storage
          try {
@@ -231,6 +274,60 @@ public class SWPTest
 
              // Check Match
              if (swp.isMatch(trapDoor, cipherText))
+                 assertTrue("Matching works Blind-foldedly !",true);
+             else
+                 assertTrue("Matching Does not work !", false);
+
+
+         } catch (Exception e){
+             e.printStackTrace();
+             assertTrue("Something went wrong .. some where !!! .." + e.getMessage(),false);
+         }
+    }
+    public void testSWP_NO_ADD_STORAGE_FNR_IP() {
+        System.out.println("Test FNR Searchable  IPAddress");
+
+        double loadFactor = 0.7; // No false positives but additional storage
+         try {
+             String givenIp = "192.168.1.1" ;
+             System.out.println("IPAddress " + givenIp);
+
+             byte[] plainBytes = FNRUtils.rankIPAddress(givenIp);
+
+             SWP swp = new SWP(SSEUtil.getSecretKeySpec(password,
+                     SSEUtil.getRandomBytes(20)), "FNR",loadFactor, plainBytes.length*Byte.SIZE);
+
+             byte[] cipheBytes = swp.encrypt(plainBytes, 1);
+
+             String cipherIp = FNRUtils.deRankIPAddress(cipheBytes);
+             System.out.println("Cipher IPAddress " + cipherIp);
+
+             if(cipheBytes.length != SWP.BLOCK_BYTES)
+                 assertTrue("Strange",false);
+             else
+                 assertTrue("No additional Storage", true);
+
+             byte[] decryptBytes = swp.decrypt(cipheBytes, 1);
+             String decryptedIP = FNRUtils.deRankIPAddress(decryptBytes);
+             System.out.println("Decrypted IPAddress " + decryptedIP);
+             if (Arrays.equals(plainBytes, decryptBytes))
+                 assertTrue("Encryption and Decryption works on bytes !",true);
+             else
+                 assertTrue("Failed Encryption and Decryption works on bytes  ", false);
+
+             if(givenIp.equals(decryptedIP))
+                 assertTrue("Encryption and Decryption works on IP Address !",true);
+             else
+                 assertTrue("Failed Encryption and Decryption works on IP Address  ", false);
+
+
+
+             // Get Trapdoor
+             byte[] trapDoor = swp.getTrapDoor(plainBytes);
+             System.out.println("Trapdoor IPAddress " + FNRUtils.deRankIPAddress(trapDoor));
+
+             // Check Match
+             if (swp.isMatch(trapDoor, cipheBytes))
                  assertTrue("Matching works Blind-foldedly !",true);
              else
                  assertTrue("Matching Does not work !", false);
