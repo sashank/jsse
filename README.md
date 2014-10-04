@@ -11,7 +11,7 @@
 	This is a personal *research prototype* use it at your own risk.
 
 	Internally uses AES from BouncyCastle Library
-	Also uses FNR for space efficiency so make sure you install libfnr
+	Also uses FNR for space efficiency so make sure you install [libfnr](https://github.com/cisco/libfnr) and [jfnr](https://github.com/cisco/jfnr)
 
   	LICENSE -- LGPL (2.1) license copy under which this library is being released
 
