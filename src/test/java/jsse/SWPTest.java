@@ -116,7 +116,7 @@ public class SWPTest
 
         double loadFactor = 1; // No false positives but additional storage
          try {
-             String givenText = "Hello " ;
+             String givenText = "192.168.1.1" ;
 
              byte[] plainBytes = FNRUtils.rankIPAddress(givenText);
 
