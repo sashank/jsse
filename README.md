@@ -6,8 +6,9 @@
 	Currently it has implementation of techniques published in
 
  	Citation : 
-	Song, Dawn Xiaoding, David Wagner, and Adrian Perrig. "Practical techniques for searches on encrypted data." 
+	[1] SWP scheme :  Song, Dawn Xiaoding, David Wagner, and Adrian Perrig. "Practical techniques for searches on encrypted data." 
 	Security and Privacy, 2000. S&P 2000. Proceedings. 2000 IEEE Symposium on. IEEE, 2000.
+	[2] WDDS scheme : SWaters, Brent R., et al. "Building an Encrypted and Searchable Audit Log." NDSS. Vol. 4. 2004.
 
 	This is a personal *research prototype* use it at your own risk.
 
