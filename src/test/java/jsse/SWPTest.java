@@ -6,6 +6,7 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
+import javax.crypto.spec.SecretKeySpec;
 import java.lang.reflect.Field;
 import java.security.Security;
 import java.util.Arrays;
@@ -78,8 +79,9 @@ public class SWPTest
 
         double loadFactor = 1; // No false positives but additional storage
          try {
-             SWP swp = new SWP(SSEUtil.getSecretKeySpec(password,
-                     SSEUtil.getRandomBytes(20)), "AES",loadFactor, 128);
+             final SecretKeySpec secretKeySpec = SSEUtil.getSecretKeySpec(password,
+                     SSEUtil.getRandomBytes(20));
+             SWP swp = new SWP(secretKeySpec, "AES",loadFactor, 128);
 
              byte[] plainBytes = ("Hello").getBytes();
              byte[] cipherText = swp.encrypt(plainBytes, 1);

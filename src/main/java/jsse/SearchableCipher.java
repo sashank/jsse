@@ -23,10 +23,6 @@ package jsse;
 
 public interface SearchableCipher {
 
-    byte[] encrypt(byte[] plainBytes, long recordID) throws Exception;
-
-    byte[] decrypt(byte[] cipherBytes, long recordID)throws Exception;
-
     byte[] encrypt(byte[] plainBytes) throws Exception;
 
     byte[] decrypt(byte[] cipherBytes)throws Exception;
