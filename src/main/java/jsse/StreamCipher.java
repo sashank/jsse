@@ -78,5 +78,31 @@ public class StreamCipher  {
         }
         return nonce;
     }
+    public  byte[] encrypt(byte[] plainBytes) throws Exception {
+
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec);
+        return cipher.doFinal(plainBytes);
+    }
+
+
+    public  byte[] decrypt(byte[] cipherText) throws Exception {
+
+        cipher.init(Cipher.DECRYPT_MODE, keySpec);
+        return cipher.doFinal(cipherText);
+    }
+
+    public byte[] encrypt(byte[] plainBytes, byte[] ivBytes) throws Exception {
+
+        cipher.init(Cipher.ENCRYPT_MODE, keySpec,new IvParameterSpec(ivBytes) );
+
+        return cipher.doFinal(plainBytes);
+    }
+
+    public byte[] decrypt(byte[] cipherBytes, byte[] ivBytes) throws Exception {
+
+        cipher.init(Cipher.DECRYPT_MODE, keySpec, new IvParameterSpec(ivBytes));
+
+        return cipher.doFinal(cipherBytes);
+    }
 
 }
