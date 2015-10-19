@@ -66,9 +66,11 @@ public class AESTest extends TestCase {
 
             if (Arrays.equals(plainBytes, plainText))
                 assertTrue("Deterministic Encryption Works" , true);
+            else
+                assertTrue("Deterministic Encryption Fails", false);
         }
         catch (Exception e){
-            assertTrue("Deterministic Encryption Does not Work" + e.getMessage() , true);
+            assertTrue("Deterministic Encryption Does not Work" + e.getMessage() , false);
         }
 
     }
@@ -92,9 +94,84 @@ public class AESTest extends TestCase {
 
             if (Arrays.equals(plainBytes, decryptBytes))
                 assertTrue("Randomized Encryption Works" , true);
+            else
+                assertTrue("Randomized Encryption Fails", false);
         }
         catch (Exception e){
-            assertTrue("Randomized Encryption Does not Work" + e.getMessage() , true);
+            assertTrue("Randomized Encryption Does not Work" + e.getMessage() , false);
+        }
+
+    }
+    public void testBoundaries() throws Exception{
+        try {
+            System.out.println("Test Boundaries");
+
+            BlockCipher blockCipher = new AES("AES/ECB/NoPadding", keySpec);
+
+            byte[] plainBytes = "CAPTURE-THE-FLAG".getBytes();
+            byte[] cipherBytes = blockCipher.encrypt(plainBytes);
+            byte[] plainText = blockCipher.decrypt(cipherBytes);
+
+            if (Arrays.equals(plainBytes, plainText))
+                assertTrue("Deterministic Encryption Works" , true);
+            else
+                assertTrue("Deterministic Encryption Fails", false);
+
+            if(cipherBytes.length == 16 )
+                assertTrue("Boundary Check Works" , true);
+            else
+                assertTrue("Boundary Check Fails" , false);
+
+            blockCipher = new AES("AES/ECB/PKCS7Padding", keySpec);
+
+            plainBytes = "CAPTURE-THE-FLAG".getBytes();
+            cipherBytes = blockCipher.encrypt(plainBytes);
+
+            if(cipherBytes.length == 32 )
+                assertTrue("Boundary Check Works" , true);
+            else
+                assertTrue("Boundary Check Fails" , false);
+
+            byte[] tmpCipherBytes;
+            plainBytes = "CAPTURE-THE-FLAG1".getBytes();
+            tmpCipherBytes = blockCipher.encrypt(plainBytes);
+
+
+            if(Arrays.equals(Arrays.copyOfRange(cipherBytes,0,16),Arrays.copyOfRange(tmpCipherBytes,0,16)) )
+                assertTrue("Cipher Prefix Matches" , true);
+            else
+                assertTrue("Cipher Prefix Does not Match" , false);
+
+
+            blockCipher = new AES("AES/CBC/PKCS5Padding", keySpec);
+
+            plainBytes = "CAPTURE-THE-FLAG".getBytes();
+            cipherBytes = blockCipher.encrypt(plainBytes,"0123456789012345".getBytes());
+
+            plainBytes = "CAPTURE-THE-FLAG1".getBytes();
+            tmpCipherBytes = blockCipher.encrypt(plainBytes, "0123456789012345".getBytes());
+
+
+            if(Arrays.equals(Arrays.copyOfRange(cipherBytes,0,16),Arrays.copyOfRange(tmpCipherBytes,0,16)) )
+                assertTrue("Cipher Prefix Matches" , false);
+            else
+                assertTrue("Cipher Prefix Does not Match" , true);
+
+
+
+            plainBytes = "CAPTURE-THE-FLAG0123456789012345".getBytes();
+            cipherBytes = blockCipher.encrypt(plainBytes);
+            plainText = blockCipher.decrypt(cipherBytes);
+
+            if(cipherBytes.length == 48 )
+                assertTrue("Boundary Check Works" , true);
+            else
+                assertTrue("Boundary Check Fails" , false);
+
+
+        }
+        catch (Exception e){
+            assertTrue("Boundaries Does not Work" + e.getMessage() , false);
         }
 
     }

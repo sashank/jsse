@@ -31,12 +31,14 @@ public class WDDSTest extends TestCase {
     }
 
     public void testCipher() throws Exception {
-        plainText = "Hello";
+        plainText = "ไทย";
         byte cipherBytes[] = searchableCipher.encrypt(plainText.getBytes());
         byte plainBytes[]  = searchableCipher.decrypt(cipherBytes);
 
         if(Arrays.equals(plainBytes, plainText.getBytes()))
             assertTrue("Encryption works",true);
+        else
+            assertFalse("Encryption Failed",false);
 
     }
 

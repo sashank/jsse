@@ -55,6 +55,12 @@ public class AES implements BlockCipher {
     }
     public AES(String mode, byte[] key) throws InvalidParameterException {
             byte[] fullKey = new byte[16];
+
+            if(key == null )
+                throw new InvalidParameterException("Key is empty cannot proceed" );
+            if(key.length > 16)
+                throw new InvalidParameterException("Key Size > 16 bytes" + key.length);
+
             System.arraycopy(key,0,fullKey,0,key.length);
             if(key.length < 16){
                for (int i = key.length ; i < 16 ; i ++)
