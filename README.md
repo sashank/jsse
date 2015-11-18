@@ -1,7 +1,7 @@
 
 	jsse is Symmetric Searchable Encryption Library in Java
 
-	jsse is developed by Sashank Dara (sashank.dara@gmail.com)
+	jsse is developed by Sashank Dara (krishna.sashank@gmail.com)
 
 	Currently it has implementation of techniques published in
 
